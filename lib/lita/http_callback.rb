@@ -35,7 +35,7 @@ module Lita
     def compute_hash_sha256(env)
       timestamp = env['HTTP_X_SLACK_REQUEST_TIMESTAMP']
       payload = "#{VERSION_NUMBER}:#{timestamp}:#{request_body(env)}"
-      "#{VERSION_NUMBER}=#{OpenSSL::HMAC.hexdigest('SHA256', slack_signing_secret, payload)}"
+      "#{VERSION_NUMBER}=#{OpenSSL::HMAC.hexdigest('SHA256', slack_signing_secret(env["lita.robot"]), payload)}"
     end
 
     def request_body(env)
@@ -44,8 +44,8 @@ module Lita
       env['rack.input'].string
     end
 
-    def slack_signing_secret
-      @slack_signing_secret ||= ENV['SLACK_SIGNING_SECRET']
+    def slack_signing_secret(config)
+      config.adapters.slack.signing_secret
     end
 
     def unauthorized_response
